@@ -89,3 +89,44 @@ def test_not_detected_connection():
 
     assert len(results) == 1
     assert results[0].status == "NOT_DETECTED"
+
+def test_multiple_connections():
+    netbox = [
+        Connection(
+            local_device="sw-core-01",
+            local_interface="Gi1/0/1",
+            remote_device="sw-access-01",
+            remote_interface="Gi1/0/48",
+            source="netbox",
+        ),
+        Connection(
+            local_device="sw-core-01",
+            local_interface="Gi1/0/2",
+            remote_device="sw-access-02",
+            remote_interface="Gi1/0/48",
+            source="netbox",
+        ),
+    ]
+
+    lldp = [
+        Connection(
+            local_device="sw-core-01",
+            local_interface="Gi1/0/1",
+            remote_device="sw-access-01",
+            remote_interface="Gi1/0/48",
+            source="lldp",
+        ),
+        Connection(
+            local_device="sw-core-01",
+            local_interface="Gi1/0/2",
+            remote_device="sw-access-03",
+            remote_interface="Gi1/0/48",
+            source="lldp",
+        ),
+    ]
+
+    results = audit_connections(netbox, lldp)
+
+    assert len(results) == 2
+    assert results[0].status == "MATCH"
+    assert results[1].status == "MISMATCH"
