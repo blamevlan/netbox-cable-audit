@@ -3,6 +3,14 @@
     "Gi1/0/1": {
       "remote_device": "sw-access-01",
       "remote_interface": "Gi1/0/48"
+    },
+    "Gi1/0/2": {
+      "remote_device": "sw-access-03",
+      "remote_interface": "Gi1/0/48"
+    },
+    "Gi1/0/3": {
+      "remote_device": "ap-01",
+      "remote_interface": "eth0"
     }
   }
 }

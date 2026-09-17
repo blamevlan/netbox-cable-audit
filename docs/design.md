@@ -1,28 +1,33 @@
 # Design
 
-`netbox-cable-audit` is a read-only CLI tool that compares LLDP neighbor data with the cabling documented in NetBox.
+`netbox-cable-audit` is a read-only CLI that compares LLDP neighbor data with cabling documented in NetBox.
 
-The main purpose is to find connections where the actual network topology and the NetBox documentation do not match.
+Both sources are converted into a shared `Connection` model before comparison.
 
-## Scope
+## Results
 
-The first version uses:
+- `MATCH`
+- `MISMATCH`
+- `UNDOCUMENTED`
+- `NOT_DETECTED`
 
-- LLDP data from a JSON file
-- cabling data from the NetBox REST API
-- NetBox cable traces to resolve the actual endpoint of a connection
+## Cable traces
 
-The JSON input is mainly used to keep LLDP collection separate from the audit logic. Real collectors such as NAPALM or SNMP can be added later.
+NetBox may document passive components between active devices. The NetBox client resolves the interface `/trace/` endpoint and uses the final termination of the documented path.
 
-The tool does not modify NetBox.
-
-## Connection model
-
-Both data sources are converted to the same internal representation:
+## Structure
 
 ```text
-local_device
-local_interface
-remote_device
-remote_interface
-source
+src/netbox_cable_audit/
+├── __init__.py
+├── models.py
+├── auditor.py
+├── netbox.py
+├── runner.py
+├── cli.py
+└── collectors/
+    ├── __init__.py
+    └── json.py
+```
+
+The audit logic is independent of the LLDP collector so live collectors can be added later.

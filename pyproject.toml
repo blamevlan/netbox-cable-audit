@@ -5,10 +5,17 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "netbox-cable-audit"
 version = "0.1.0"
+description = "Read-only LLDP vs NetBox cable audit CLI"
+readme = "README.md"
 requires-python = ">=3.11"
-dependencies = [
-    "requests>=2.32"
-]
+dependencies = ["requests>=2.32"]
+
+[project.optional-dependencies]
+dev = ["pytest>=9.0"]
 
 [project.scripts]
 netbox-cable-audit = "netbox_cable_audit.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--basetemp=.pytest_tmp"
