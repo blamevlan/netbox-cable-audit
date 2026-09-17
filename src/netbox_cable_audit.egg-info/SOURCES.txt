@@ -1,6 +1,0 @@
-pyproject.toml
-src/netbox_cable_audit/__init__.py
-src/netbox_cable_audit.egg-info/PKG-INFO
-src/netbox_cable_audit.egg-info/SOURCES.txt
-src/netbox_cable_audit.egg-info/dependency_links.txt
-src/netbox_cable_audit.egg-info/top_level.txt
