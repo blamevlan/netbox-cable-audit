@@ -8,3 +8,7 @@ class Connection:
     remote_device: str
     remote_interface: str
     source: str
+
+@dataclass(frozen=True)
+class AuditResult:
+    status: str
