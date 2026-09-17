@@ -18,8 +18,13 @@ class NetBoxClient:
         }
 
     def _get(self, path: str, params=None):
+        if path.startswith(("http://", "https://")):
+            url = path
+        else:
+            url = f"{self.base_url}{path}"
+
         response = requests.get(
-            f"{self.base_url}{path}",
+            url,
             headers=self._headers(),
             params=params,
             timeout=self.timeout,
@@ -27,6 +32,16 @@ class NetBoxClient:
 
         response.raise_for_status()
         return response.json()
+
+    def _get_all(self, path: str, params=None):
+        data = self._get(path, params=params)
+        results = list(data["results"])
+
+        while data.get("next"):
+            data = self._get(data["next"])
+            results.extend(data["results"])
+
+        return results
 
     def get_device(self, name: str):
         data = self._get(
@@ -57,24 +72,23 @@ class NetBoxClient:
 
         return results[0]
 
+    def get_interfaces(self, device_id: int):
+        return self._get_all(
+            "/api/dcim/interfaces/",
+            params={"device_id": device_id},
+        )
+
     def trace_interface(self, interface_id: int):
         return self._get(
             f"/api/dcim/interfaces/{interface_id}/trace/"
         )
 
-    def get_connection(self, local_device: str, local_interface: str):
-        device = self.get_device(local_device)
-
-        if device is None:
-            return None
-
-        interface = self.get_interface(device["id"], local_interface)
-
-        if interface is None:
-            return None
-
-        trace = self.trace_interface(interface["id"])
-
+    def _connection_from_trace(
+        self,
+        local_device: str,
+        local_interface: str,
+        trace,
+    ):
         if not trace:
             return None
 
@@ -96,3 +110,48 @@ class NetBoxClient:
             remote_interface=endpoint["name"],
             source="netbox",
         )
+
+    def get_connection(self, local_device: str, local_interface: str):
+        device = self.get_device(local_device)
+
+        if device is None:
+            return None
+
+        interface = self.get_interface(device["id"], local_interface)
+
+        if interface is None:
+            return None
+
+        trace = self.trace_interface(interface["id"])
+
+        return self._connection_from_trace(
+            local_device,
+            local_interface,
+            trace,
+        )
+
+    def get_connections(self, local_device: str):
+        device = self.get_device(local_device)
+
+        if device is None:
+            return []
+
+        interfaces = self.get_interfaces(device["id"])
+        connections = []
+
+        for interface in interfaces:
+            if interface.get("cable") is None:
+                continue
+
+            trace = self.trace_interface(interface["id"])
+
+            connection = self._connection_from_trace(
+                local_device,
+                interface["name"],
+                trace,
+            )
+
+            if connection is not None:
+                connections.append(connection)
+
+        return connections
