@@ -9,3 +9,6 @@ requires-python = ">=3.11"
 dependencies = [
     "requests>=2.32"
 ]
+
+[project.scripts]
+netbox-cable-audit = "netbox_cable_audit.cli:main"

@@ -1,0 +1,1 @@
+{"sw-core-01": {"Gi1/0/1": {"remote_device": "sw-access-01", "remote_interface": "Gi1/0/48"}}, "sw-core-02": {"Gi1/0/1": {"remote_device": "sw-access-02", "remote_interface": "Gi1/0/48"}}}
