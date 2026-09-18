@@ -8,6 +8,7 @@ version = "0.1.0"
 description = "Read-only LLDP vs NetBox cable audit CLI"
 readme = "README.md"
 requires-python = ">=3.11"
+license = { text = "MIT" }
 dependencies = ["requests>=2.32"]
 
 [project.optional-dependencies]
@@ -15,6 +16,10 @@ dev = ["pytest>=9.0"]
 
 [project.scripts]
 netbox-cable-audit = "netbox_cable_audit.cli:main"
+
+[project.urls]
+Repository = "https://github.com/blamevlan/netbox-cable-audit"
+Issues = "https://github.com/blamevlan/netbox-cable-audit/issues"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

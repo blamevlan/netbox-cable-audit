@@ -1,21 +1,21 @@
 # netbox-cable-audit
 
-`netbox-cable-audit` is a small read-only CLI that compares LLDP neighbor data with cabling documented in NetBox.
+A small read-only CLI I wrote to compare cabling documented in NetBox with the neighbors switches report through LLDP.
 
-It is intended for cases where NetBox is the source of truth, but the actual network topology should be checked against what switches report through LLDP.
+Current version: **0.1.0**
+
+The tool does not write to NetBox.
 
 ## Results
 
-- `MATCH` — NetBox and LLDP point to the same remote device and interface
-- `MISMATCH` — both sides have data, but the remote endpoint differs
-- `UNDOCUMENTED` — LLDP sees a neighbor, but NetBox has no documented connection
-- `NOT_DETECTED` — NetBox has a documented connection, but LLDP did not report a neighbor
-
-The tool does not modify NetBox.
+- `MATCH`: NetBox and LLDP point to the same remote device and interface
+- `MISMATCH`: both sides have data, but the remote endpoint differs
+- `UNDOCUMENTED`: LLDP sees a neighbor, but NetBox has no documented connection
+- `NOT_DETECTED`: NetBox has a documented connection, but LLDP did not report a neighbor
 
 ## Cable traces
 
-NetBox can model passive components such as patch panels between two active devices.
+Passive components such as patch panels can sit between two active devices. NetBox models that path, while LLDP only sees the active endpoints.
 
 ```text
 sw-core-01
@@ -27,7 +27,7 @@ patch panel
 sw-access-01
 ```
 
-LLDP only sees the active endpoints. The NetBox client therefore uses the interface `/trace/` endpoint and compares LLDP against the final endpoint of the documented path.
+The NetBox client follows the interface `/trace/` endpoint and compares LLDP with the final active endpoint of the documented path.
 
 ## Install
 
@@ -36,9 +36,9 @@ py -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -e ".[dev]"
 ```
 
-Activation of the virtual environment is optional.
+Activating the virtual environment is optional.
 
-## LLDP JSON format
+## LLDP input
 
 ```json
 {
@@ -51,15 +51,7 @@ Activation of the virtual environment is optional.
 }
 ```
 
-A device may also be present with no discovered neighbors:
-
-```json
-{
-  "sw-core-01": {}
-}
-```
-
-This keeps the device in audit scope so documented NetBox links can still be reported as `NOT_DETECTED`.
+A device can also be present with an empty object. That keeps it in audit scope even if LLDP found no neighbors.
 
 ## Run
 
@@ -69,7 +61,7 @@ Set a read-only NetBox API token:
 $env:NETBOX_TOKEN = "your-token"
 ```
 
-Run the audit:
+Then run the audit:
 
 ```powershell
 .\.venv\Scripts\netbox-cable-audit.exe audit examples\lldp.json --netbox-url http://localhost:8000
@@ -77,17 +69,15 @@ Run the audit:
 
 ## Exit codes
 
-- `0` — audit completed and every result is `MATCH`
-- `1` — audit completed with at least one discrepancy
-- `2` — input, configuration, or API error
+- `0`: audit completed and every result is `MATCH`
+- `1`: audit completed with at least one discrepancy
+- `2`: input, configuration or API error
 
 ## Tests
 
 ```powershell
 .\.venv\Scripts\python.exe -m pytest -q
 ```
-
-Pytest uses a temporary directory inside the project to avoid Windows temp-directory permission problems.
 
 ## Local NetBox lab
 
@@ -97,4 +87,8 @@ The script prompts for a writable NetBox authorization header if `NETBOX_SEED_AU
 
 ## Current scope
 
-Version 0.1 intentionally does not include live SNMP/NAPALM collection, interface-name normalization, NetBox writes, a web UI, or a NetBox plugin.
+Version 0.1 intentionally does not include live SNMP/NAPALM collection, interface-name normalization, NetBox writes, a web UI or a NetBox plugin.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
